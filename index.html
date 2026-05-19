@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>乒乓球內部賽對陣表 | 循環淘汰賽</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #1a472a 0%, #0e2a1a 100%);
+            font-family: 'Segoe UI', '微軟正黑體', 'PingFang TC', 'Noto Sans TC', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 主要賽事卡片 */
+        .tournament-container {
+            max-width: 1400px;
+            width: 100%;
+            background: rgba(255, 248, 225, 0.92);
+            border-radius: 56px;
+            box-shadow: 0 30px 40px rgba(0, 0, 0, 0.35), inset 0 1px 4px rgba(255, 255, 200, 0.8);
+            backdrop-filter: blur(2px);
+            padding: 20px 24px 40px 24px;
+            transition: all 0.2s ease;
+        }
+
+        /* 標題區 */
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+            border-bottom: 3px solid #c9a87b;
+            padding-bottom: 18px;
+        }
+
+        .header h1 {
+            font-size: 2.6rem;
+            letter-spacing: 4px;
+            color: #2d2b1f;
+            text-shadow: 3px 3px 0 #e9d6b0;
+            margin: 0;
+            font-weight: 800;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #3e2c1b;
+            background: #f7e9cf;
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 60px;
+            margin-top: 12px;
+            font-weight: 500;
+            box-shadow: inset 0 0 2px #b88b4a, 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 隨機抽籤按鈕區域 */
+        .action-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 32px;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: #f5e7d3;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 10px 28px;
+            border-radius: 48px;
+            color: #3b2a1f;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.2s;
+            box-shadow: 0 5px 0 #af8f66;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #af8f66;
+        }
+
+        .btn-primary {
+            background: #ffd966;
+            color: #2c4722;
+            box-shadow: 0 5px 0 #b97f2e;
+        }
+
+        /* 對陣表網格 (淘汰賽模式) */
+        .bracket {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: center;
+            gap: 28px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            margin-top: 15px;
+        }
+
+        /* 每一輪的欄位 */
+        .round {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            min-width: 240px;
+            background: #fffef7;
+            border-radius: 32px;
+            padding: 18px 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid #ebdbba;
+        }
+
+        .round-title {
+            text-align: center;
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: #c9a46b;
+            color: white;
+            margin: -18px -12px 18px -12px;
+            padding: 12px 0;
+            border-radius: 32px 32px 28px 28px;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 0 #6b4c2a;
+        }
+
+        /* 對戰組合卡 */
+        .matchup {
+            background: #faf3e0;
+            margin: 12px 0;
+            border-radius: 28px;
+            padding: 12px 8px;
+            transition: all 0.15s;
+            border-left: 8px solid #e2b56a;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .player {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            background: white;
+            border-radius: 40px;
+            margin: 5px 0;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #2c3e2b;
+            border: 1px solid #f0e0c4;
+        }
+
+        .player-name {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: #d9b48b;
+            color: white;
+            border-radius: 30px;
+            padding: 2px 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .vs {
+            text-align: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: #b97f44;
+            background: #ffe3b5;
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            border-radius: 50%;
+            margin: 0 auto;
+        }
+
+        .empty-slot {
+            background: #e9e0cf;
+            color: #997f5c;
+            text-align: center;
+            padding: 12px;
+            border-radius: 40px;
+            font-style: italic;
+            font-weight: 500;
+        }
+
+        .champion-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 200px;
+            background: linear-gradient(135deg, #fbeccd, #f7deae);
+            border-radius: 48px;
+            border: 3px solid #dbb162;
+        }
+
+        .champion-card {
+            text-align: center;
+            padding: 24px 10px;
+        }
+
+        .champion-card h3 {
+            font-size: 1.8rem;
+            margin: 0;
+            color: #b45f1b;
+        }
+
+        .trophy-icon {
+            font-size: 3rem;
+        }
+
+        /* 選手名單小區塊 */
+        .player-list {
+            background: #e7dcc4;
+            border-radius: 48px;
+            padding: 12px 20px;
+            margin-top: 35px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #2e3820;
+        }
+
+        .player-list span {
+            background: white;
+            padding: 4px 18px;
+            border-radius: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #5c4a2e;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 850px) {
+            .bracket {
+                gap: 12px;
+            }
+            .round {
+                min-width: 200px;
+            }
+            .player {
+                font-size: 0.8rem;
+                padding: 4px 8px;
+            }
+            .round-title {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="tournament-container">
+    <div class="header">
+        <h1>🏓 乒乓球內部賽對陣表</h1>
+        <p>淘汰制 · 隨機抽籤對戰</p>
+    </div>
+    <div class="action-bar">
+        <button class="btn btn-primary" id="randomizeBtn">🎲 隨機重新抽籤</button>
+        <button class="btn" id="resetOriginalBtn">📋 原始順序對戰</button>
+    </div>
+
+    <!-- 動態淘汰賽對陣表將渲染在此 -->
+    <div id="bracketContainer" class="bracket">
+        <!-- js 動態生成 -->
+    </div>
+
+    <!-- 參賽選手名單 -->
+    <div class="player-list">
+        <span>🏅 參賽者：</span>
+        <span>曾梓涵</span><span>關宇晉</span><span>陳加銘</span><span>楊浩</span>
+        <span>張希宇</span><span>蔡鍏銓</span><span>曾梓涵</span><span>譚睿齊</span>
+        <span>楊婉慇</span><span>石振星</span>
+    </div>
+    <footer>※ 淘汰賽制：隨機配對，輪空自動晉級。點擊按鈕重新產生對陣表</footer>
+</div>
+
+<script>
+    // ----- 原始參賽者列表 (保留重複名字「曾梓涵」出現兩次，視為獨立兩位選手) -----
+    const RAW_PLAYERS = [
+        "曾梓涵", "關宇晉", "陳加銘", "楊浩", "張希宇",
+        "蔡鍏銓", "曾梓涵", "譚睿齊", "楊婉慇", "石振星"
+    ];
+
+    // 檢查人數: 10人
+    // 淘汰賽建立對陣樹: 需要補滿至 2^n 個位置 (輪空機制)
+    // 此函數根據給定的選手陣列 (順序即為種子順序) 建立完整對陣樹結構，回傳每一輪的對戰配對列表
+    function buildBracketFromPlayers(playersArray) {
+        let n = playersArray.length;
+        // 計算最接近的2的冪次 (不小於n)
+        let size = 1;
+        while (size < n) {
+            size <<= 1;
+        }
+        // 建立第一輪的參賽者陣列 (前n個為選手，後續補null表示輪空)
+        let firstRoundPlayers = [...playersArray];
+        while (firstRoundPlayers.length < size) {
+            firstRoundPlayers.push(null); // null 代表輪空位
+        }
+
+        // 儲存所有輪次: 每輪是一個陣列，元素為 { left: 選手名或null, right: 選手名或null, winner: 尚未決定(初始null) }
+        // 實際上我們只需要顯示對陣表，不需要即時計算勝者，展示時只要呈現對戰雙方即可。
+        // 但有輪空情況下顯示「輪空晉級」等文字。
+        // 為了顯示方便，我們遞迴建立各輪次配對 (展示從第一輪到決賽)
+        
+        // 定義一個遞迴函數來產生 bracket round list
+        // 做法: 給定一層選手列表 (長度為2的冪次)，產生該層的配對列表，然後產生下一層晉級者列表(依賴勝方，但展示勝方暫時留白/未知)
+        // 但為了展示對陣表(賽前狀態)，我們只顯示每個matchup的左右選手，勝者尚未產生，不預測。
+        // 而輪空情況：如果一方為null，另一方自動晉級，但呈現時標註「輪空」即可。
+        
+        let rounds = []; // 儲存每一輪的對戰組合 [{ leftName, rightName, leftIsNull, rightIsNull }]
+        let currentRoundPlayers = [...firstRoundPlayers];
+        
+        // 持續直到剩下1個選手 (冠軍戰)
+        while (currentRoundPlayers.length > 1) {
+            let matches = [];
+            let nextRoundPlayers = [];
+            for (let i = 0; i < currentRoundPlayers.length; i += 2) {
+                let leftPlayer = currentRoundPlayers[i];
+                let rightPlayer = currentRoundPlayers[i+1];
+                // 儲存此對戰資料 (顯示用)
+                matches.push({
+                    left: leftPlayer,
+                    right: rightPlayer,
+                    // 附加輔助標記
+                    leftIsNull: leftPlayer === null,
+                    rightIsNull: rightPlayer === null
+                });
+                // 決定晉級者 (若一方輪空，晉級非輪空者；若兩方都輪空不可能發生，若雙方都存在則勝者未決定 暫設null)
+                let winner = null;
+                if (leftPlayer !== null && rightPlayer === null) winner = leftPlayer;
+                else if (leftPlayer === null && rightPlayer !== null) winner = rightPlayer;
+                else if (leftPlayer !== null && rightPlayer !== null) winner = null; // 待決
+                // 若兩人都是null 極端狀況理論上不會發生 (因總人數為偶數補齊2^n時若原始為0? 但我們有選手)
+                else winner = null;
+                nextRoundPlayers.push(winner);
+            }
+            rounds.push(matches);
+            currentRoundPlayers = nextRoundPlayers;
+        }
+        
+        // 增加冠亞軍最終結果 (單一冠軍戰組合)
+        // 最後一輪已經包含冠軍戰，rounds 最後一個元素就是決賽對戰組合。
+        // 回傳rounds資料以供渲染
+        return rounds;
+    }
+    
+    // 渲染對陣表到DOM
+    function renderBracket(rounds) {
+        const container = document.getElementById('bracketContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        if (!rounds || rounds.length === 0) {
+            container.innerHTML = '<div style="padding:40px">無法產生對陣表</div>';
+            return;
+        }
+        
+        // 取得最後一輪(決賽)索引，另外我們可能額外顯示冠軍資訊
+        const totalRounds = rounds.length;
+        
+        rounds.forEach((matches, roundIdx) => {
+            const roundDiv = document.createElement('div');
+            roundDiv.className = 'round';
+            // 輪次名稱
+            let roundName = '';
+            if (roundIdx === 0) roundName = '第一輪 (16強/10進制)';
+            else if (roundIdx === 1) roundName = '半準決賽 (8強)';
+            else if (roundIdx === 2) roundName = '準決賽 (4強)';
+            else if (roundIdx === 3) roundName = '決賽 🏆';
+            else roundName = `第${roundIdx+1}輪`;
+            
+            // 如果總回合數為4輪(10人補至16=2^4, 會有四輪: R1,QF,SF,F) 
+            if (totalRounds === 4) {
+                if (roundIdx === 0) roundName = '第一輪 (十人對戰·輪空晉級)';
+                else if (roundIdx === 1) roundName = '八強賽';
+                else if (roundIdx === 2) roundName = '四強賽';
+                else if (roundIdx === 3) roundName = '冠軍戰 🏆';
+            } else if (totalRounds === 3) { // 例如剛好8人狀況 但這裡10人不會發生
+                if (roundIdx === 0) roundName = '八強賽';
+                else if (roundIdx === 1) roundName = '四強賽';
+                else if (roundIdx === 2) roundName = '決賽';
+            }
+            
+            const titleSpan = document.createElement('div');
+            titleSpan.className = 'round-title';
+            titleSpan.innerText = roundName;
+            roundDiv.appendChild(titleSpan);
+            
+            matches.forEach(match => {
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'matchup';
+                
+                // 左邊選手
+                const leftDiv = document.createElement('div');
+                leftDiv.className = 'player';
+                const leftNameSpan = document.createElement('div');
+                leftNameSpan.className = 'player-name';
+                if (match.left === null || match.leftIsNull) {
+                    leftNameSpan.innerHTML = '<span class="badge" style="background:#a37e58;">輪空</span> <span style="color:#a77f4b;">(自動晉級)</span>';
+                } else {
+                    leftNameSpan.innerHTML = `<span class="badge">⚡</span> <strong>${escapeHtml(match.left)}</strong>`;
+                }
+                leftDiv.appendChild(leftNameSpan);
+                
+                // 中間 VS
+                const vsDiv = document.createElement('div');
+                vsDiv.className = 'vs';
+                vsDiv.innerText = 'VS';
+                
+                // 右邊選手
+                const rightDiv = document.createElement('div');
+                rightDiv.className = 'player';
+                const rightNameSpan = document.createElement('div');
+                rightNameSpan.className = 'player-name';
+                if (match.right === null || match.rightIsNull) {
+                    rightNameSpan.innerHTML = '<span class="badge" style="background:#a37e58;">輪空</span> <span style="color:#a77f4b;">(自動晉級)</span>';
+                } else {
+                    rightNameSpan.innerHTML = `<span class="badge">⚡</span> <strong>${escapeHtml(match.right)}</strong>`;
+                }
+                rightDiv.appendChild(rightNameSpan);
+                
+                matchDiv.appendChild(leftDiv);
+                matchDiv.appendChild(vsDiv);
+                matchDiv.appendChild(rightDiv);
+                roundDiv.appendChild(matchDiv);
+            });
+            
+            container.appendChild(roundDiv);
+        });
+        
+        // 額外建立一個冠軍展示卡片 (從最後一輪的勝方尚未決定，但為了氛圍顯示冠亞軍對決)
+        const finalRound = rounds[rounds.length-1];
+        if (finalRound && finalRound.length === 1) {
+            const championMatch = finalRound[0];
+            const leftName = championMatch.left === null ? '輪空' : championMatch.left;
+            const rightName = championMatch.right === null ? '輪空' : championMatch.right;
+            // 建立冠軍預覽區域 (不影響 bracket)
+            let existingChamp = document.querySelector('.champion-area');
+            if (!existingChamp) {
+                const champWrapper = document.createElement('div');
+                champWrapper.className = 'champion-area';
+                champWrapper.id = 'dynamicChampionBox';
+                container.parentElement.appendChild(champWrapper);
+                existingChamp = champWrapper;
+            } else {
+                existingChamp.innerHTML = '';
+            }
+            existingChamp.innerHTML = `
+                <div class="champion-card">
+                    <div class="trophy-icon">🏆</div>
+                    <h3>決賽對決</h3>
+                    <p style="font-size:1.2rem; font-weight:bold;">${escapeHtml(leftName)}  VS  ${escapeHtml(rightName)}</p>
+                    <p style="font-size:0.8rem;">※ 勝者為最終冠軍</p>
+                </div>
+            `;
+        } else {
+            const champBox = document.querySelector('.champion-area');
+            if(champBox) champBox.remove();
+        }
+    }
+    
+    // 簡易防XSS
+    function escapeHtml(str) {
+        if (str === null) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // 隨機洗牌 (Fisher-Yates) 複製新陣列
+    function shuffleArray(arr) {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+    
+    // 主要更新對陣表 (給定選手列表順序)
+    function updateBracketWithPlayers(playerList) {
+        const rounds = buildBracketFromPlayers(playerList);
+        renderBracket(rounds);
+        // 儲存目前選手順序至 session 或 全域, 以便重置隨機抽籤記錄
+        window.currentPlayerOrder = [...playerList];
+    }
+    
+    // 隨機抽籤順序
+    function randomizeAndUpdate() {
+        const shuffled = shuffleArray(RAW_PLAYERS);
+        updateBracketWithPlayers(shuffled);
+    }
+    
+    // 重置為原始順序 (依照給定RAW_PLAYERS順序)
+    function resetOriginalOrder() {
+        // 原始的RAW_PLAYERS 順序: 曾梓涵,關宇晉,陳加銘,楊浩,張希宇,蔡鍏銓,曾梓涵,譚睿齊,楊婉慇,石振星
+        updateBracketWithPlayers([...RAW_PLAYERS]);
+    }
+    
+    // 初始化加載隨機對陣表 (第一次加載隨機，展現趣味)
+    function init() {
+        // 為了讓第一次呈現隨機感，調用隨機生成
+        randomizeAndUpdate();
+        // 綁定按鈕事件
+        const randomBtn = document.getElementById('randomizeBtn');
+        const resetBtn = document.getElementById('resetOriginalBtn');
+        if (randomBtn) randomBtn.addEventListener('click', randomizeAndUpdate);
+        if (resetBtn) resetBtn.addEventListener('click', resetOriginalOrder);
+    }
+    
+    // 執行初始化
+    init();
+</script>
+</body>
+</html>
