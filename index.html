@@ -3,576 +3,709 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>乒乓球內部賽 - 循環對陣表 (五局三勝制)</title>
+    <title>乒乓球內部賽 - 淘汰賽對陣表 (11分制)</title>
     <style>
         * {
             box-sizing: border-box;
-            font-family: 'Segoe UI', '微軟正黑體', system-ui, -apple-system, 'PingFang TC', 'Noto Sans TC', sans-serif;
+            user-select: none; /* 避免拖動文字影響填分，但輸入框仍可編輯 */
         }
         body {
             background: linear-gradient(145deg, #1a472a 0%, #0e2a1a 100%);
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
+            font-family: 'Segoe UI', '微軟正黑體', 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', system-ui, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 30px 20px;
+            margin: 0;
+            min-height: 100vh;
         }
+        /* 主容器 */
         .tournament-container {
             max-width: 1400px;
             width: 100%;
-            background: rgba(255,248,225,0.95);
+            background: rgba(255,248,225,0.9);
             border-radius: 48px;
-            box-shadow: 0 25px 45px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,200,0.6);
-            overflow-x: auto;
-            padding: 20px 20px 30px 20px;
-            backdrop-filter: blur(0px);
+            box-shadow: 0 25px 45px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,200,0.6);
+            backdrop-filter: blur(2px);
+            padding: 20px 25px 35px 25px;
+            transition: all 0.2s;
         }
         h1 {
             text-align: center;
-            font-size: 2.2rem;
+            font-size: 2.4rem;
             margin: 0 0 5px 0;
-            color: #f7d44a;
-            text-shadow: 3px 3px 0 #b45f1b;
+            color: #ffd966;
+            text-shadow: 4px 4px 0 #b45f1b;
             letter-spacing: 2px;
             word-break: keep-all;
         }
         .sub {
             text-align: center;
             font-size: 1.1rem;
-            color: #f9efc0;
+            color: #f9eec1;
             background: #2c5e2e;
             display: inline-block;
             width: auto;
             margin: 0 auto 20px;
             padding: 6px 20px;
-            border-radius: 60px;
-            box-shadow: inset 0 1px 3px #6f9e6f, 0 2px 4px rgba(0,0,0,0.2);
+            border-radius: 40px;
+            background: #3d2b1a;
+            box-shadow: inset 0 0 0 1px #efc48c, 0 3px 6px rgba(0,0,0,0.2);
         }
-        .rule-badge {
-            background: #e9b13b;
-            color: #2d2b1f;
-            font-weight: bold;
-            font-size: 0.85rem;
-            padding: 6px 14px;
-            border-radius: 32px;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-        .rule-badge span {
-            background: #2d2b1f;
-            color: #ffeaac;
-            padding: 3px 12px;
+        .rule-note {
+            text-align: center;
+            background: #fff2df;
             border-radius: 30px;
+            padding: 8px 15px;
+            display: inline-block;
+            width: auto;
+            margin: 0 auto 25px;
+            font-weight: bold;
+            color: #b34e1a;
+            border-left: 5px solid #e67e22;
+            font-size: 0.9rem;
         }
-        .header-info {
+        /* 對陣表區域 - 使用grid佈局: 依回合數動態 */
+        .bracket {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px 50px;
+            margin-top: 20px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+        }
+        /* 每一輪的 column */
+        .round {
+            flex: 1;
+            min-width: 260px;
+            background: #fef5e6;
+            border-radius: 32px;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.2);
+            padding: 16px 12px 20px;
+            backdrop-filter: blur(4px);
+            border: 1px solid #ffd58c;
+        }
+        .round-title {
+            font-size: 1.6rem;
+            font-weight: bold;
+            text-align: center;
+            background: #d9a13b;
+            background: linear-gradient(135deg, #c97e2a, #e7b25c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: none;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #ffbf69;
+            display: inline-block;
+            width: 100%;
+            padding-bottom: 6px;
+            color: #2d2b26;
+            background: none;
+            color: #6b3e1c;
+        }
+        /* 比賽卡牌 */
+        .match-card {
+            background: #ffffffdd;
+            background: linear-gradient(135deg, #fff9ef, #fff2e2);
+            margin-bottom: 20px;
+            border-radius: 28px;
+            padding: 12px 10px 14px;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.1);
+            transition: transform 0.1s ease, box-shadow 0.2s;
+            border: 1px solid #ffe1aa;
+        }
+        .match-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+            background: #fffcf5;
+        }
+        .players {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
+            gap: 8px;
+            margin-bottom: 12px;
             flex-wrap: wrap;
-            margin-bottom: 10px;
-            border-bottom: 2px solid #d4b87a;
-            padding-bottom: 10px;
         }
-        .total-players {
-            background: #2e5c2b;
-            padding: 4px 15px;
-            border-radius: 40px;
-            color: #fee3a0;
-            font-weight: bold;
-        }
-        .note {
-            font-size: 0.85rem;
-            color: #4e3e28;
-            background: #fff0cf;
-            padding: 6px 12px;
-            border-radius: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-            background-color: #fffef7;
-            border-radius: 32px;
-            overflow: hidden;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
-            min-width: 800px;
-        }
-        th {
-            background: #2c5e2e;
-            color: #ffefb9;
-            font-weight: bold;
-            padding: 14px 6px;
-            font-size: 1rem;
-            border: 1px solid #528a46;
-            position: sticky;
-            top: 0;
-            white-space: nowrap;
-        }
-        td {
-            border: 1px solid #dbcba4;
+        .player {
+            flex: 1;
             text-align: center;
-            vertical-align: middle;
-            padding: 8px 4px;
-            background-color: #fffcf0;
+            font-weight: bold;
+            background: #f5e5cf;
+            padding: 8px 5px;
+            border-radius: 60px;
+            font-size: 1rem;
+            color: #4c2a10;
+            box-shadow: inset 0 1px 3px #cbad82, 0 1px 0 white;
         }
-        .player-name {
-            font-weight: 700;
-            background-color: #f6edcf;
-            color: #2e471f;
-            white-space: nowrap;
+        .vs {
+            font-size: 1.1rem;
+            background: #cc7b2e;
+            color: white;
+            border-radius: 40px;
+            padding: 4px 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        .match-cell {
-            background: #fef7e6;
-            transition: 0.1s ease;
+        .score-area {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin: 10px 0 8px;
+            align-items: center;
         }
-        .score-input-group {
+        .score-input {
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
-            min-width: 100px;
+            gap: 5px;
         }
-        .set-scores {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px;
-            background: #f3ebd2;
-            padding: 5px 8px;
-            border-radius: 28px;
-        }
-        .set-box {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            background: white;
-            border-radius: 40px;
-            padding: 2px 8px;
-            box-shadow: inset 0 1px 2px #aaa, 0 1px 2px #fff8;
-        }
-        .set-label {
+        .score-input label {
             font-size: 0.7rem;
             font-weight: bold;
-            color: #876b38;
+            background: #d9b48b;
+            padding: 2px 12px;
+            border-radius: 30px;
+            color: white;
         }
-        .score-input {
-            width: 38px;
+        .score-input input {
+            width: 75px;
             text-align: center;
+            font-size: 1.4rem;
             font-weight: bold;
-            border: 1px solid #c9b576;
-            border-radius: 20px;
-            padding: 4px 0;
-            font-size: 0.85rem;
-            background: #fffaf0;
+            font-family: monospace;
+            border: 2px solid #dcb571;
+            border-radius: 32px;
+            padding: 6px 0;
+            background: #fcf3e2;
             transition: 0.1s;
+            color: #3b2a1f;
         }
-        .score-input:focus {
+        .score-input input:focus {
             outline: none;
-            border-color: #e6a017;
-            box-shadow: 0 0 0 2px #ffd966;
+            border-color: #e67e22;
+            background: #fff7e8;
+            box-shadow: 0 0 0 3px rgba(230,126,34,0.2);
         }
-        .match-result {
-            font-size: 0.75rem;
+        .match-status {
+            font-size: 0.7rem;
+            text-align: center;
+            color: #b87333;
+            margin-top: 8px;
             font-weight: bold;
-            background: #e9ddb0;
-            border-radius: 20px;
-            padding: 4px 8px;
-            margin-top: 4px;
-            display: inline-block;
-            width: auto;
+            background: #eadbc8;
+            border-radius: 40px;
+            padding: 4px 5px;
         }
         .winner-badge {
-            color: #bc6f1a;
-            background: #fff0b5;
-            border-radius: 14px;
-            padding: 2px 8px;
+            background: #27ae60;
+            color: white;
+            border-radius: 20px;
+            padding: 3px 8px;
             font-size: 0.7rem;
-            font-weight: bold;
+            display: inline-block;
+            margin-top: 5px;
         }
-        button.auto-reset-btn {
-            background: #dd9338;
+        button.calc-btn {
+            background: #ffb347;
             border: none;
-            padding: 6px 16px;
-            border-radius: 60px;
+            padding: 6px 12px;
+            border-radius: 50px;
             font-weight: bold;
-            color: #2c2b1f;
-            margin: 15px auto 0;
+            color: #2c1a0a;
             cursor: pointer;
-            transition: 0.2s;
-            font-size: 0.85rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            margin-top: 8px;
+            font-size: 0.7rem;
+            transition: 0.1s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        button.auto-reset-btn:hover {
-            background: #f3b551;
+        button.calc-btn:hover {
+            background: #ff9f1c;
             transform: scale(0.97);
         }
-        .footer-actions {
+        .final-rank {
+            margin-top: 30px;
+            background: #2c2b26e0;
+            background: linear-gradient(145deg, #31271e, #221c15);
+            border-radius: 48px;
+            padding: 18px 25px;
+            color: #f7e5c2;
+            box-shadow: inset 0 0 0 2px #efbc7b, 0 8px 18px black;
+        }
+        .final-rank h2 {
+            margin: 0 0 12px 0;
+            font-size: 1.8rem;
             display: flex;
-            justify-content: center;
-            margin-top: 25px;
-            gap: 20px;
+            align-items: center;
+            gap: 10px;
+            border-left: 8px solid gold;
+            padding-left: 20px;
+        }
+        .rank-list {
+            display: flex;
             flex-wrap: wrap;
+            gap: 28px;
+            justify-content: space-around;
+            font-size: 1.1rem;
+            font-weight: bold;
         }
-        .save-status {
-            font-size: 0.8rem;
-            color: #2c5e2e;
-            background: #e9f0da;
-            padding: 6px 14px;
-            border-radius: 40px;
+        .rank-item {
+            background: #00000066;
+            padding: 6px 18px;
+            border-radius: 60px;
+            backdrop-filter: blur(4px);
         }
-        @media (max-width: 880px) {
-            .set-scores { gap: 4px; }
-            .set-box { padding: 1px 4px; }
-            .score-input { width: 32px; font-size: 0.75rem; }
-            th, td { padding: 6px 2px; }
-            .player-name { font-size: 0.8rem; }
+        .refresh-tip {
+            text-align: right;
+            font-size: 0.7rem;
+            color: #987b54;
+            margin-top: 12px;
         }
-        @media (max-width: 700px) {
-            .score-input-group { min-width: 130px; }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            margin-top: 25px;
+            color: #c7aa7b;
+        }
+        @media (max-width: 860px) {
+            .bracket {
+                flex-direction: column;
+                align-items: center;
+            }
+            .round {
+                width: 100%;
+            }
+            .score-input input {
+                width: 65px;
+                font-size: 1.2rem;
+            }
+        }
+        .auto-win-text {
+            font-style: italic;
+            color: #b87333;
         }
     </style>
 </head>
 <body>
 <div class="tournament-container">
-    <h1>🏓 乒乓球內部賽 · 循環對陣表 🏓</h1>
-    <div style="text-align: center; margin-bottom: 12px;">
-        <div class="rule-badge">
-            📌 賽制：五局三勝制｜每局11分 (先得11分且領先2分者勝)
-            <span>🏆 勝一場得1分，負方0分</span>
-        </div>
+    <h1>🏓 乒乓球內部賽 🏓</h1>
+    <div style="text-align: center;">
+        <div class="sub">淘汰賽對陣表 · 一局11分制</div>
+        <div class="rule-note">✨ 每場比賽率先獲得11分者勝出 (不需領先2分，經典11分制) ✨<br>點擊「✅ 記錄勝者」完成比賽並自動晉級，最後產生完整名次</div>
     </div>
-    <div class="header-info">
-        <div class="total-players">👥 參賽人數：10 人 (單循環)</div>
-        <div class="note">✏️ 點擊分數欄位輸入每局比分 (先輸入左方選手分數，再輸入右方選手分數) 系統自動判定勝負及獲勝方</div>
+
+    <div id="bracketRoot" class="bracket">
+        <!-- 動態產生 bracket -->
     </div>
-    <div style="overflow-x: auto;">
-        <table id="roundRobinTable">
-            <thead id="tableHeader">
-                <!-- 動態生成標題列 (選手名稱) -->
-            </thead>
-            <tbody id="tableBody">
-                <!-- 動態生成對戰列 -->
-            </tbody>
-        </table>
+
+    <div id="rankArea" class="final-rank">
+        <h2>🏆 最終排名 🏆</h2>
+        <div id="rankList">尚未完成所有比賽，無法計算最終名次</div>
+        <div class="refresh-tip">※ 每一場比賽完成後，名次會自動更新。</div>
     </div>
-    <div class="footer-actions">
-        <button class="auto-reset-btn" id="resetAllBtn">🧹 清除所有比分 & 重置對陣結果</button>
-        <div class="save-status" id="saveIndicator">✅ 所有分數自動儲存於瀏覽器</div>
-    </div>
-    <div style="text-align: center; margin-top: 18px; font-size: 0.7rem; color:#785e2e;">
-        ※ 每局比分需要完整填寫雙方分數才會生效，五局三勝制優先獲取三局勝利者即贏得該場對戰。
-    </div>
+    <footer>⚡ 點擊「記錄勝者」自動晉級下一輪 | 分數輸入需為非負整數，系統會判斷勝方 (先得11分者)</footer>
 </div>
 
 <script>
-    // 選手列表 (繁體中文顯示)
-    const players = [
-        "曾梓涵", "關宇晉", "陳加銘", "楊浩", "張希宇",
-        "蔡鍏銓", "羅樂恩", "譚睿齊", "楊婉慇", "石振星"
+    // ----- 參賽者名單 (繁體中文)
+    const participants = [
+        "曾梓涵", "關宇晉", "陳加銘", "楊浩", 
+        "張希宇", "蔡鍏銓", "羅樂恩", "譚睿齊", 
+        "楊婉慇", "石振星"
     ];
-    const TOTAL_PLAYERS = players.length;
+    const TOTAL_PLAYERS = participants.length;  // 10人
 
-    // 儲存結構: matches[playerA_index][playerB_index] = 對戰紀錄物件
-    // 只存 i < j 的組合; 物件內容: { winner: null或index, sets: [{aScore,bScore}, ...] , completed: false }
-    // 但為了支援五局三勝，最多五局，每局須雙方分數都有才算該局完成。當一方獲得三勝時比賽結束(但填寫時超過仍可記錄)
-    // 為直觀，我們允許填滿五局分數，自動判斷誰先到三勝為勝者。但如果雙方都沒三勝，視為未完成。
-    let matchesData = {};
-
-    // 初始化儲存結構
-    function initMatchesData() {
-        for (let i = 0; i < TOTAL_PLAYERS; i++) {
-            for (let j = i+1; j < TOTAL_PLAYERS; j++) {
-                const key = `${i}-${j}`;
-                if (!matchesData[key]) {
-                    matchesData[key] = {
-                        winner: null,      // 勝者索引 (i 或 j)
-                        sets: [],          // 最多5局，每局 { aScore: null|number, bScore: null|number }
-                        completed: false   // 是否已達成五局三勝 (作為參考)
-                    };
-                    // 初始化五局空位
-                    for (let s = 0; s < 5; s++) {
-                        matchesData[key].sets.push({ aScore: null, bScore: null });
-                    }
-                } else {
-                    // 確保有五局
-                    while(matchesData[key].sets.length < 5) matchesData[key].sets.push({ aScore: null, bScore: null });
-                }
-            }
+    // 淘汰賽結構: 第一輪需補輪空 (byes) 使總人數為 2 的冪次? 為了公平且直接淘汰賽, 但10人需要第一輪部分種子輪空。
+    // 標準: 取大於等於人數的最小2的冪: 16，首輪輪空位 = 16-10 = 6個輪空。
+    // 我們設計一個 bracket 資料結構: 每一輪為陣列, 元素為 { id, playerA, playerB, scoreA, scoreB, winner, matchCompleted, roundIndex, matchIndex, nextMatchId? }
+    // 為了簡單維護晉級, 我們使用遞迴生成樹方式，但使用動態即時更新。
+    // 更穩妥：建立競賽樹，首輪有16個位置，10個選手，6個輪空(自動晉級)。
+    // 之後八強賽、四強賽、決賽+季軍戰。因淘汰賽要決定完整名次, 需要有季軍戰(第三名爭奪)。
+    // 我們實現完整淘汰賽樹: R1 (16強) -> 8強 -> 4強 -> 決賽 + 季軍戰 (輸掉半決賽的兩人爭第三)
+    // 這樣所有選手都能獲得排名。
+    
+    // 建立種子位置(按給定順序排列)，為簡化，按原始順序安排位置1~10，輪空給後面。
+    // 讓前10個位置為選手，位置11~16為輪空（代表直接晉級）。
+    // 第一輪比賽配對: (1vs16),(2vs15),(3vs14),(4vs13),(5vs12),(6vs11),(7vs10),(8vs9)
+    // 但為了讓選手均勻，採標準蛇形? 但輪空無所謂，讓選手對上輪空即自動晉級。
+    // 我們定義第一輪 match list: 每場比賽兩個選手，輪空選手用 "(輪空)" 表示，不用填分數，直接判定輪空方晉級。
+    
+    // 定義全域 brackets 狀態
+    let tournamentData = {
+        rounds: [],   // 每個round為 { name, matches: [] }
+        finalRank: [] // 最終排名陣列 (冠軍,亞軍,季軍,殿軍,八強...等)
+    };
+    
+    // 工具: 深拷貝用於重建? 我們用動態方式，每次分數更新或晉級更新重新render一次，並重新計算排名。
+    // 儲存所有match的當前狀態 (分數、勝者)
+    let matchesStore = []; // 扁平儲存所有比賽 { id, roundIdx, matchIdx, playerA, playerB, scoreA, scoreB, winner, isCompleted, isBye }
+    
+    let nextMatchId = 1;
+    
+    // 初始化整個淘汰賽結構
+    function initTournament() {
+        matchesStore = [];
+        // 第一輪: 16強 共8場比賽 (位置依標準錦標賽)
+        const firstRoundMatches = [];
+        // 構建對陣列表: 根據種子排序1~16
+        const slots = new Array(16).fill(null);
+        for (let i = 0; i < participants.length; i++) {
+            slots[i] = participants[i];
         }
+        // 剩餘位置為輪空
+        for (let i = participants.length; i < 16; i++) {
+            slots[i] = "輪空";
+        }
+        // 按照 bracket 配對: (1 vs 16), (2 vs 15), (3 vs 14), (4 vs 13), (5 vs 12), (6 vs 11), (7 vs 10), (8 vs 9)
+        const pairing = [
+            [0,15], [1,14], [2,13], [3,12],
+            [4,11], [5,10], [6,9], [7,8]
+        ];
+        for (let i = 0; i < pairing.length; i++) {
+            const idxA = pairing[i][0];
+            const idxB = pairing[i][1];
+            let playerA = slots[idxA];
+            let playerB = slots[idxB];
+            const isBye = (playerA === "輪空" || playerB === "輪空");
+            let winner = null;
+            let completed = false;
+            // 如果有一方輪空，自動判定勝者為另一方，並且比賽立即完成
+            if (isBye) {
+                winner = (playerA === "輪空") ? playerB : playerA;
+                completed = true;
+            }
+            const match = {
+                id: nextMatchId++,
+                roundIdx: 0,   // 0: 第一輪(16強)
+                matchIdx: i,
+                playerA: playerA,
+                playerB: playerB,
+                scoreA: null,
+                scoreB: null,
+                winner: winner,
+                isCompleted: completed,
+                isBye: isBye,
+                nextMatchRef: null  // 後續晉級目標暫定
+            };
+            firstRoundMatches.push(match);
+        }
+        matchesStore.push(...firstRoundMatches);
+        
+        // 建立第二輪(八強) 4場，初始勝者未知
+        const quarterMatches = [];
+        for (let i = 0; i < 4; i++) {
+            quarterMatches.push({
+                id: nextMatchId++,
+                roundIdx: 1,
+                matchIdx: i,
+                playerA: null,
+                playerB: null,
+                scoreA: null,
+                scoreB: null,
+                winner: null,
+                isCompleted: false,
+                isBye: false,
+            });
+        }
+        matchesStore.push(...quarterMatches);
+        
+        // 第三輪(準決賽) 2場
+        const semiMatches = [];
+        for (let i = 0; i < 2; i++) {
+            semiMatches.push({
+                id: nextMatchId++,
+                roundIdx: 2,
+                matchIdx: i,
+                playerA: null,
+                playerB: null,
+                scoreA: null,
+                scoreB: null,
+                winner: null,
+                isCompleted: false,
+                isBye: false,
+            });
+        }
+        matchesStore.push(...semiMatches);
+        
+        // 決賽 (冠軍戰) 1場
+        const finalMatch = {
+            id: nextMatchId++,
+            roundIdx: 3,
+            matchIdx: 0,
+            playerA: null,
+            playerB: null,
+            scoreA: null,
+            scoreB: null,
+            winner: null,
+            isCompleted: false,
+            isBye: false,
+        };
+        matchesStore.push(finalMatch);
+        
+        // 季軍戰 (三四名) 1場
+        const thirdPlaceMatch = {
+            id: nextMatchId++,
+            roundIdx: 3,
+            matchIdx: 1,
+            playerA: null,
+            playerB: null,
+            scoreA: null,
+            scoreB: null,
+            winner: null,
+            isCompleted: false,
+            isBye: false,
+        };
+        matchesStore.push(thirdPlaceMatch);
+        
+        // 建立晉級映射: 根據比賽索引，將勝者傳入下一輪
+        // 第一輪8場 -> 第二輪4場 (0,1->第二輪0 ; 2,3->第二輪1 ; 4,5->第二輪2 ; 6,7->第二輪3)
+        for (let i = 0; i < 8; i++) {
+            const targetQuarterIdx = Math.floor(i / 2);
+            // 將第一輪的match與第二輪關聯，在判定勝者時更新
+        }
+        // 第二輪4場 -> 準決賽2場 (0,1 -> semi0 ; 2,3 -> semi1)
+        // 準決賽2場 -> 決賽(勝者組) & 季軍戰(敗者組)
+        // 我們在更新邏輯中，每次任一比賽完成後，自動將勝者填入對應下一輪，並清除之前舊有選手。
+        // 為了方便維護，寫一個 function propagateWinner(matchId)
     }
-
-    // 輔助: 根據目前局數判定勝者 (回傳 winnerIndex 或 null)
-    function computeWinnerFromSets(i, j, sets) {
-        let winsA = 0, winsB = 0;
-        for (let s = 0; s < sets.length; s++) {
-            const aVal = sets[s].aScore;
-            const bVal = sets[s].bScore;
-            if (aVal !== null && bVal !== null && typeof aVal === 'number' && typeof bVal === 'number') {
-                // 判定該局勝方 (11分制且有兩分領先，但在這邊基本上只要分數合法，則高分者勝，但要符合桌球規則: 至少11分且領先2分)
-                // 為嚴謹，我們檢查是否有效勝局: (aVal >= 11 && aVal - bVal >= 2) 或 (bVal >= 11 && bVal - aVal >=2)
-                // 若不合規則該局不計入有效勝場（顯示警告但保持不增加勝場，或另外處理），但為了實用性，若任一方達到11且差值>=2判勝，若雙方都未達成則該局無效不計。
-                let isValid = false;
-                let winnerInSet = null;
-                if (aVal >= 11 && (aVal - bVal) >= 2) {
-                    isValid = true;
-                    winnerInSet = i;
-                } else if (bVal >= 11 && (bVal - aVal) >= 2) {
-                    isValid = true;
-                    winnerInSet = j;
-                } 
-                // 如果雙方分數超過20分以上繼續比賽，但只要是領先2分且>=11即可
-                // 若都不符合，則該局不算任何勝場
-                if (isValid && winnerInSet === i) winsA++;
-                else if (isValid && winnerInSet === j) winsB++;
-            }
+    
+    // 根據比賽ID找到其所在位置，以及它應該晉級到哪一場比賽的哪一個位置(A或B)
+    function getNextMatchInfo(currentMatch) {
+        const round = currentMatch.roundIdx;
+        const idx = currentMatch.matchIdx;
+        // round 0 -> 第一輪, round1->八強, round2->四強, round3->決賽/季軍
+        if (round === 0) {
+            // 第一輪8場，晉級到第二輪 (round1) 的 matchIdx = floor(idx/2) ，並且是該場的 playerA還是B? 根據奇偶
+            const targetRound = 1;
+            const targetMatchIdx = Math.floor(idx / 2);
+            const position = (idx % 2 === 0) ? 'A' : 'B';  // 0->A,1->A? 第一個match對應A? 注意每兩場組合: idx0,idx1 => 第二輪0的playerA,playerB
+            return { targetRound, targetMatchIdx, position };
+        } 
+        else if (round === 1) {
+            // 八強4場晉級到準決賽 (round2)
+            const targetRound = 2;
+            const targetMatchIdx = Math.floor(idx / 2);
+            const position = (idx % 2 === 0) ? 'A' : 'B';
+            return { targetRound, targetMatchIdx, position };
         }
-        if (winsA >= 3) return i;
-        if (winsB >= 3) return j;
+        else if (round === 2) {
+            // 準決賽2場: 勝者晉級決賽，敗者晉級季軍戰
+            // 注意: 我們需要同時記錄勝者去決賽，敗者去季軍戰。
+            // 為了簡化，我們在更新勝者時，同時處理半決賽兩邊勝者和敗者更新決賽/季軍。
+            // 返回特殊標記: 需要更新兩個目標
+            return { type: 'semifinal', matchIdx: idx };
+        }
         return null;
     }
-
-    // 更新某場比賽的勝者 & 儲存狀態
-    function updateMatchWinner(i, j) {
-        const key = `${i}-${j}`;
-        const match = matchesData[key];
-        if (!match) return;
-        const winnerIdx = computeWinnerFromSets(i, j, match.sets);
-        match.winner = winnerIdx;
-        match.completed = (winnerIdx !== null);
-        // 儲存到 localStorage
-        saveToLocalStorage();
-        // 重新渲染對戰表格 (僅更新該cell或全部刷新，為簡單全部重繪)
-        renderTable();
-    }
-
-    // 處理分數變更 (選手A,B, 局數索引, 側邊 'a' or 'b')
-    function handleScoreChange(i, j, setIndex, side, event) {
-        let rawValue = event.target.value.trim();
-        let numValue = rawValue === "" ? null : Number(rawValue);
-        if (rawValue !== "" && (isNaN(numValue) || numValue < 0 || !Number.isInteger(numValue))) {
-            alert("請輸入0以上的整數分數");
-            event.target.value = (side === 'a' ? (matchesData[`${i}-${j}`]?.sets[setIndex]?.aScore ?? '') : (matchesData[`${i}-${j}`]?.sets[setIndex]?.bScore ?? ''));
-            return;
-        }
-        if (numValue !== null && (numValue < 0 || numValue > 200)) {
-            alert("分數範圍請在0~200之間");
-            event.target.value = (side === 'a' ? (matchesData[`${i}-${j}`]?.sets[setIndex]?.aScore ?? '') : (matchesData[`${i}-${j}`]?.sets[setIndex]?.bScore ?? ''));
-            return;
-        }
-        const key = `${i}-${j}`;
-        const match = matchesData[key];
-        if (!match) return;
-        if (side === 'a') {
-            match.sets[setIndex].aScore = (numValue === null ? null : numValue);
-        } else {
-            match.sets[setIndex].bScore = (numValue === null ? null : numValue);
-        }
-        // 額外同步: 如果雙方分數皆存在但不符合11分兩分差，不影響勝場計算但保留分數。
-        saveToLocalStorage();
-        // 重新計算勝者
-        const newWinner = computeWinnerFromSets(i, j, match.sets);
-        match.winner = newWinner;
-        match.completed = (newWinner !== null);
-        saveToLocalStorage();
-        renderTable();  // 刷新顯示
-    }
-
-    // 儲存全部資料
-    function saveToLocalStorage() {
-        localStorage.setItem("pingpong_round_robin_v2", JSON.stringify(matchesData));
-    }
-
-    // 載入資料
-    function loadFromLocalStorage() {
-        const stored = localStorage.getItem("pingpong_round_robin_v2");
-        if (stored) {
-            try {
-                const parsed = JSON.parse(stored);
-                // 合併資料確保結構完整
-                for (let i = 0; i < TOTAL_PLAYERS; i++) {
-                    for (let j = i+1; j < TOTAL_PLAYERS; j++) {
-                        const key = `${i}-${j}`;
-                        if (parsed[key]) {
-                            // 確保sets長度五局
-                            if (parsed[key].sets && Array.isArray(parsed[key].sets)) {
-                                while(parsed[key].sets.length < 5) parsed[key].sets.push({ aScore: null, bScore: null });
-                                // 保證每個局物件屬性正確
-                                for(let s=0;s<5;s++){
-                                    if(!parsed[key].sets[s] || typeof parsed[key].sets[s].aScore === 'undefined') 
-                                        parsed[key].sets[s] = { aScore: null, bScore: null };
-                                }
-                            } else {
-                                parsed[key].sets = [];
-                                for(let s=0;s<5;s++) parsed[key].sets.push({ aScore: null, bScore: null });
-                            }
-                            matchesData[key] = parsed[key];
-                        }
-                    }
-                }
-                // 重新確保每個 key 都存在
-                for (let i = 0; i < TOTAL_PLAYERS; i++) {
-                    for (let j = i+1; j < TOTAL_PLAYERS; j++) {
-                        const key = `${i}-${j}`;
-                        if (!matchesData[key]) {
-                            matchesData[key] = {
-                                winner: null,
-                                sets: [],
-                                completed: false
-                            };
-                            for(let s=0;s<5;s++) matchesData[key].sets.push({ aScore: null, bScore: null });
-                        }
-                    }
-                }
-            } catch(e) { console.warn(e); initMatchesData(); }
-        } else {
-            initMatchesData();
-        }
-        // 額外確保所有賽事winner同步
-        for (let i = 0; i < TOTAL_PLAYERS; i++) {
-            for (let j = i+1; j < TOTAL_PLAYERS; j++) {
-                const key = `${i}-${j}`;
-                const match = matchesData[key];
-                const winnerFromSets = computeWinnerFromSets(i, j, match.sets);
-                if (match.winner !== winnerFromSets) {
-                    match.winner = winnerFromSets;
-                    match.completed = (winnerFromSets !== null);
-                }
-            }
-        }
-        saveToLocalStorage();
-    }
-
-    // 重置所有分數
-    function resetAllScores() {
-        if (confirm("⚠️ 確定清除所有比賽的比分及勝負記錄嗎？此操作無法復原。")) {
-            for (let i = 0; i < TOTAL_PLAYERS; i++) {
-                for (let j = i+1; j < TOTAL_PLAYERS; j++) {
-                    const key = `${i}-${j}`;
-                    matchesData[key] = {
-                        winner: null,
-                        sets: [],
-                        completed: false
-                    };
-                    for (let s = 0; s < 5; s++) {
-                        matchesData[key].sets.push({ aScore: null, bScore: null });
-                    }
-                }
-            }
-            saveToLocalStorage();
-            renderTable();
-        }
-    }
-
-    // 渲染完整表格
-    function renderTable() {
-        const thead = document.getElementById("tableHeader");
-        const tbody = document.getElementById("tableBody");
-        if (!thead || !tbody) return;
-        // 建立表頭: 第一欄空白，其餘為選手名稱
-        let headerHtml = '<tr><th>選手／對手</th>';
-        for (let p of players) {
-            headerHtml += `<th>${p}</th>`;
-        }
-        headerHtml += '</tr>';
-        thead.innerHTML = headerHtml;
+    
+    // 更新所有晉級鏈 (當任何比賽被標示為完成且有勝者時)
+    function updateBracketLinks() {
+        // 重置第二輪之後的所有選手(未完成比賽的選手清零，保留先前勝者但若上級尚未有結果則清)
+        // 但我們不重置已完成，而是重新計算所有未完成的比賽的選手填入
+        // 取得所有比賽，並根據勝者重設後續選手
         
-        let bodyHtml = '';
-        for (let i = 0; i < TOTAL_PLAYERS; i++) {
-            bodyHtml += `<tr>`;
-            bodyHtml += `<td class="player-name" style="font-weight:800;">${players[i]}</td>`;
-            for (let j = 0; j < TOTAL_PLAYERS; j++) {
-                if (i === j) {
-                    bodyHtml += `<td style="background:#e2dccf; color:#796e47;">—</td>`;
-                } else if (i < j) {
-                    // 顯示對戰內容
-                    const key = `${i}-${j}`;
-                    const match = matchesData[key];
-                    const sets = match?.sets || [];
-                    const winnerIdx = match?.winner;
-                    // 決定勝者文字
-                    let winnerText = "";
-                    if (winnerIdx === i) winnerText = `🏆 ${players[i]} 勝`;
-                    else if (winnerIdx === j) winnerText = `🏆 ${players[j]} 勝`;
-                    else winnerText = "未完成";
-                    
-                    // 產生五局輸入框 (局數1~5)
-                    let setsHtml = `<div class="score-input-group"><div class="set-scores">`;
-                    for (let s = 0; s < 5; s++) {
-                        const setData = sets[s] || { aScore: null, bScore: null };
-                        const aVal = (setData.aScore !== null && setData.aScore !== undefined) ? setData.aScore : '';
-                        const bVal = (setData.bScore !== null && setData.bScore !== undefined) ? setData.bScore : '';
-                        setsHtml += `
-                            <div class="set-box">
-                                <span class="set-label">局${s+1}</span>
-                                <input type="text" inputmode="numeric" class="score-input" data-i="${i}" data-j="${j}" data-set="${s}" data-side="a" value="${aVal}" placeholder="分">
-                                <span>:</span>
-                                <input type="text" inputmode="numeric" class="score-input" data-i="${i}" data-j="${j}" data-set="${s}" data-side="b" value="${bVal}" placeholder="分">
-                            </div>
-                        `;
-                    }
-                    setsHtml += `</div><div class="match-result">${winnerText}</div></div>`;
-                    bodyHtml += `<td class="match-cell">${setsHtml}</td>`;
-                } else {
-                    // i > j, 顯示鏡像結果 (省略重複, 但可顯示參考勝負)
-                    const key = `${j}-${i}`;
-                    const match = matchesData[key];
-                    const winnerIdx = match?.winner;
-                    let summary = "";
-                    if (winnerIdx === j) summary = `${players[j]} 勝`;
-                    else if (winnerIdx === i) summary = `${players[i]} 勝`;
-                    else summary = "待賽";
-                    bodyHtml += `<td style="background:#f3efdf; font-size:0.8rem;">↺ ${summary}</td>`;
+        // 先清除round1~round3所有未完成的比賽中 playerA,playerB 除了已經完成之外
+        for (let m of matchesStore) {
+            if (m.roundIdx >= 1 && !m.isCompleted) {
+                m.playerA = null;
+                m.playerB = null;
+            }
+        }
+        // 根據第一輪勝者填充八強
+        for (let i = 0; i < 8; i++) {
+            const firstMatch = matchesStore.find(m => m.roundIdx === 0 && m.matchIdx === i);
+            if (firstMatch && firstMatch.isCompleted && firstMatch.winner) {
+                const targetRound = 1;
+                const targetIdx = Math.floor(i / 2);
+                const position = (i % 2 === 0) ? 'playerA' : 'playerB';
+                const targetMatch = matchesStore.find(m => m.roundIdx === targetRound && m.matchIdx === targetIdx);
+                if (targetMatch && !targetMatch.isCompleted) {
+                    targetMatch[position] = firstMatch.winner;
                 }
             }
-            bodyHtml += `</tr>`;
         }
-        tbody.innerHTML = bodyHtml;
+        // 八強填充四強
+        for (let i = 0; i < 4; i++) {
+            const qMatch = matchesStore.find(m => m.roundIdx === 1 && m.matchIdx === i);
+            if (qMatch && qMatch.isCompleted && qMatch.winner) {
+                const targetRound = 2;
+                const targetIdx = Math.floor(i / 2);
+                const position = (i % 2 === 0) ? 'playerA' : 'playerB';
+                const targetMatch = matchesStore.find(m => m.roundIdx === targetRound && m.matchIdx === targetIdx);
+                if (targetMatch && !targetMatch.isCompleted) {
+                    targetMatch[position] = qMatch.winner;
+                }
+            }
+        }
+        // 處理四強 -> 決賽 & 季軍戰
+        const semi0 = matchesStore.find(m => m.roundIdx === 2 && m.matchIdx === 0);
+        const semi1 = matchesStore.find(m => m.roundIdx === 2 && m.matchIdx === 1);
+        const finalMatch = matchesStore.find(m => m.roundIdx === 3 && m.matchIdx === 0);
+        const thirdMatch = matchesStore.find(m => m.roundIdx === 3 && m.matchIdx === 1);
+        if (finalMatch && !finalMatch.isCompleted) {
+            finalMatch.playerA = null;
+            finalMatch.playerB = null;
+        }
+        if (thirdMatch && !thirdMatch.isCompleted) {
+            thirdMatch.playerA = null;
+            thirdMatch.playerB = null;
+        }
+        if (semi0 && semi0.isCompleted && semi0.winner && finalMatch && !finalMatch.isCompleted) finalMatch.playerA = semi0.winner;
+        if (semi1 && semi1.isCompleted && semi1.winner && finalMatch && !finalMatch.isCompleted) finalMatch.playerB = semi1.winner;
+        // 敗者去季軍戰
+        if (semi0 && semi0.isCompleted && semi0.winner && semi0.playerA && semi0.playerB) {
+            const loser0 = (semi0.winner === semi0.playerA) ? semi0.playerB : semi0.playerA;
+            if (thirdMatch && !thirdMatch.isCompleted) thirdMatch.playerA = loser0;
+        }
+        if (semi1 && semi1.isCompleted && semi1.winner && semi1.playerA && semi1.playerB) {
+            const loser1 = (semi1.winner === semi1.playerA) ? semi1.playerB : semi1.playerA;
+            if (thirdMatch && !thirdMatch.isCompleted) thirdMatch.playerB = loser1;
+        }
+    }
+    
+    // 比賽完成判定 (手動觸發, 根據分數)
+    function completeMatch(matchId, forceWinner) {
+        const match = matchesStore.find(m => m.id === matchId);
+        if (!match || match.isCompleted || match.isBye) return false;
+        if (match.scoreA === null || match.scoreB === null) return false;
+        let a = parseInt(match.scoreA, 10);
+        let b = parseInt(match.scoreB, 10);
+        if (isNaN(a)) a = 0;
+        if (isNaN(b)) b = 0;
+        if (a >= 11 || b >= 11) {
+            const winner = (a >= 11) ? match.playerA : match.playerB;
+            match.winner = winner;
+            match.isCompleted = true;
+            updateBracketLinks();
+            renderAll();
+            computeFinalRankings();
+            return true;
+        }
+        return false;
+    }
+    
+    // 計算最終排名 (依照淘汰賽結構)
+    function computeFinalRankings() {
+        const finalMatch = matchesStore.find(m => m.roundIdx === 3 && m.matchIdx === 0);
+        const thirdMatch = matchesStore.find(m => m.roundIdx === 3 && m.matchIdx === 1);
+        const champion = (finalMatch && finalMatch.isCompleted) ? finalMatch.winner : null;
+        const亚军 = (finalMatch && finalMatch.isCompleted && finalMatch.playerA && finalMatch.playerB) ? 
+            (finalMatch.winner === finalMatch.playerA ? finalMatch.playerB : finalMatch.playerA) : null;
+        let third = null, fourth = null;
+        if (thirdMatch && thirdMatch.isCompleted) {
+            third = thirdMatch.winner;
+            fourth = (thirdMatch.winner === thirdMatch.playerA) ? thirdMatch.playerB : thirdMatch.playerA;
+        }
+        // 收集其餘八強止步名單 (依照八強輸給晉級者)
+        const rankMap = [];
+        if (champion) rankMap.push(`🥇 冠軍: ${champion}`);
+        if (亚军) rankMap.push(`🥈 亞軍: ${亚军}`);
+        if (third) rankMap.push(`🥉 季軍: ${third}`);
+        if (fourth) rankMap.push(`4️⃣ 殿軍: ${fourth}`);
+        // 八強賽輸家: 找出八強賽已完成但未晉級到四強 (且沒有進四強)
+        const quarterLosers = [];
+        for (let m of matchesStore) {
+            if (m.roundIdx === 1 && m.isCompleted && m.winner) {
+                const loser = (m.winner === m.playerA) ? m.playerB : m.playerA;
+                if (loser && loser !== "輪空") quarterLosers.push(loser);
+            }
+        }
+        const uniqueLosers = [...new Set(quarterLosers)].filter(l => l && l !== champion && l !== 亚军 && l !== third && l !== fourth);
+        if (uniqueLosers.length) rankMap.push(`🎽 八強止步: ${uniqueLosers.join("、")}`);
+        // 第一輪止步
+        const firstLosers = [];
+        for (let m of matchesStore) {
+            if (m.roundIdx === 0 && m.isCompleted && m.winner && !m.isBye) {
+                const loser = (m.winner === m.playerA) ? m.playerB : m.playerA;
+                if (loser && loser !== "輪空" && !uniqueLosers.includes(loser) && loser !== champion && loser !== 亚军 && loser !== third && loser !== fourth) firstLosers.push(loser);
+            }
+        }
+        const finalFirst = [...new Set(firstLosers)];
+        if (finalFirst.length) rankMap.push(`🏅 首輪止步: ${finalFirst.join("、")}`);
         
-        // 重新綁定所有輸入事件 (動態生成)
-        const allScoreInputs = document.querySelectorAll('.score-input');
-        for (let input of allScoreInputs) {
-            input.removeEventListener('change', scoreInputHandler);
-            input.addEventListener('change', scoreInputHandler);
+        const rankDiv = document.getElementById("rankList");
+        if (rankMap.length === 0 || (!champion && !thirdMatch?.isCompleted)) rankDiv.innerHTML = "🏁 請繼續完成所有比賽 (決賽 & 季軍戰) 才能顯示完整排名 🏁";
+        else rankDiv.innerHTML = `<div class="rank-list">${rankMap.map(r => `<div class="rank-item">${r}</div>`).join('')}</div>`;
+    }
+    
+    // 渲染整個 bracket
+    function renderAll() {
+        const roundsDef = [
+            { name: "🔰 第一輪 (16強)", roundIdx: 0 },
+            { name: "🏅 八強賽", roundIdx: 1 },
+            { name: "🔥 準決賽", roundIdx: 2 },
+            { name: "🏆 決賽 & 季軍戰", roundIdx: 3 }
+        ];
+        const container = document.getElementById("bracketRoot");
+        container.innerHTML = "";
+        for (let rd of roundsDef) {
+            const roundMatches = matchesStore.filter(m => m.roundIdx === rd.roundIdx).sort((a,b)=>a.matchIdx - b.matchIdx);
+            if (roundMatches.length === 0) continue;
+            const roundDiv = document.createElement("div");
+            roundDiv.className = "round";
+            roundDiv.innerHTML = `<div class="round-title">${rd.name}</div>`;
+            for (let match of roundMatches) {
+                const card = document.createElement("div");
+                card.className = "match-card";
+                const isBye = match.isBye && match.roundIdx === 0;
+                const pA = match.playerA || "待定";
+                const pB = match.playerB || "待定";
+                card.innerHTML = `
+                    <div class="players">
+                        <div class="player">${pA}</div>
+                        <div class="vs">VS</div>
+                        <div class="player">${pB}</div>
+                    </div>
+                    ${!match.isCompleted && !isBye && match.playerA && match.playerB && match.playerA !== "輪空" && match.playerB !== "輪空" ? `
+                    <div class="score-area">
+                        <div class="score-input"><label>${pA} 得分</label><input type="number" min="0" step="1" value="${match.scoreA !== null ? match.scoreA : 0}" class="scoreA-input" data-id="${match.id}" data-side="A"></div>
+                        <div class="score-input"><label>${pB} 得分</label><input type="number" min="0" step="1" value="${match.scoreB !== null ? match.scoreB : 0}" class="scoreB-input" data-id="${match.id}" data-side="B"></div>
+                    </div>
+                    <div style="text-align:center"><button class="calc-btn" data-id="${match.id}">✅ 記錄勝者 (11分制)</button></div>
+                    ` : (match.isCompleted ? `<div class="match-status">🏆 勝方: ${match.winner} 🏆</div>` : (isBye ? `<div class="match-status">⚡ 自動晉級: ${match.winner} (輪空)</div>` : `<div class="match-status">⏳ 等待前一輪晉級者</div>`))}
+                `;
+                roundDiv.appendChild(card);
+            }
+            container.appendChild(roundDiv);
         }
+        // 綁定事件
+        document.querySelectorAll(".calc-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const mid = parseInt(btn.getAttribute("data-id"), 10);
+                const match = matchesStore.find(m => m.id === mid);
+                if (match && !match.isCompleted) {
+                    const scoreAinp = document.querySelector(`.scoreA-input[data-id="${mid}"]`);
+                    const scoreBinp = document.querySelector(`.scoreB-input[data-id="${mid}"]`);
+                    if (scoreAinp && scoreBinp) {
+                        match.scoreA = parseInt(scoreAinp.value,10);
+                        match.scoreB = parseInt(scoreBinp.value,10);
+                        completeMatch(mid);
+                    }
+                }
+            });
+        });
+        // 讓即時變動更新數字到store
+        document.querySelectorAll(".scoreA-input, .scoreB-input").forEach(inp => {
+            inp.addEventListener("change", function() {
+                const mid = parseInt(this.getAttribute("data-id"),10);
+                const side = this.getAttribute("data-side");
+                const match = matchesStore.find(m => m.id === mid);
+                if(match && !match.isCompleted){
+                    const val = parseInt(this.value,10);
+                    if(side==="A") match.scoreA = isNaN(val)?0:val;
+                    else match.scoreB = isNaN(val)?0:val;
+                }
+            });
+        });
+        computeFinalRankings();
     }
     
-    // 全域事件處理
-    function scoreInputHandler(event) {
-        const input = event.target;
-        const i = parseInt(input.getAttribute('data-i'));
-        const j = parseInt(input.getAttribute('data-j'));
-        const setIdx = parseInt(input.getAttribute('data-set'));
-        const side = input.getAttribute('data-side');
-        if (isNaN(i) || isNaN(j) || isNaN(setIdx)) return;
-        handleScoreChange(i, j, setIdx, side, event);
-    }
-    
-    // 監聽重置按鈕
-    document.addEventListener('DOMContentLoaded', () => {
-        loadFromLocalStorage();
-        renderTable();
-        const resetBtn = document.getElementById('resetAllBtn');
-        if (resetBtn) resetBtn.addEventListener('click', resetAllScores);
-        // 自動儲存提示
-        const indicator = document.getElementById('saveIndicator');
-        if(indicator) setTimeout(() => { indicator.style.opacity = '0.7'; }, 1500);
-    });
-    
-    // 輔助: 若需即時重新計算排名積分表可加，但需求僅對陣表比分輸入，但不需額外積分榜？但循環賽常見積分榜可增加但非主要，
-    // 為符合題目「電子版對陣表填上每位隊員的分數」，已經充分支持每一局比分，並顯示場勝者。完全足夠。
-    // 為了更好的體驗 加上勝場顯示與重置儲存功能。
-    // 額外修正: 處理當某一局雙方分數達成有效判勝但另外一方分數空的處理，已經在change雙邊。
-    // 添加規則提示每局有效性: 輸入分數會計算勝利條件但不會警告不合規則的分數，使用者依據桌球規則輸入即可。
-    // 若輸入不合規則分數（沒贏兩分）則該局不計入勝場，用者可以修改到正確比分。
-    // 完全符合五局三勝制及11分制。
-
+    initTournament();
+    updateBracketLinks();
+    renderAll();
 </script>
 </body>
 </html>
